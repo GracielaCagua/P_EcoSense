@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# EcoSense
-=======
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -74,4 +71,3 @@ export default defineConfig([
   },
 ])
 ```
->>>>>>> e94b1dd (configuracion de Supabase)
