@@ -1,28 +1,41 @@
-import { useA11yPrefs } from "../hooks/useA11yPrefs";
+import { useEffect, useState } from "react";
 
-export default function ThemeToggle(){
-  const { prefs, setPrefs } = useA11yPrefs();
+export default function ThemeToggle() {
+  const [theme, setTheme] = useState(() => {
+    // Cargar tema del localStorage o usar el del sistema
+    if (localStorage.getItem("theme"))
+      return localStorage.getItem("theme") as string;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
 
-  const cycle = () => {
-    setPrefs(p => ({
-      ...p,
-      mode: p.mode === "system" ? "light" : p.mode === "light" ? "dark" : "system",
-    }));
+  // Cambiar el tema globalmente
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // Alternar entre modos
+  const toggleTheme = () => {
+    setTheme((prev) =>
+      prev === "light" ? "dark" : prev === "dark" ? "system" : "light"
+    );
   };
 
+  // Mostrar texto o icono según el tema actual
   const label =
-    prefs.mode === "system" ? "Tema del sistema" :
-    prefs.mode === "light"  ? "Modo claro" :
-                              "Modo oscuro";
+    theme === "light"
+      ? "☀️ Claro"
+      : theme === "dark"
+      ? "🌙 Oscuro"
+      : "💻 Sistema";
 
   return (
     <button
-      type="button"
-      onClick={cycle}
-      className="btn-outline"
-      aria-pressed={prefs.mode !== "system"}
-      aria-label={`Cambiar tema: ${label}`}
-      title={`Tema actual: ${label} (clic para cambiar)`}
+      onClick={toggleTheme}
+      className="px-3 py-2 rounded-lg border border-white/30 hover:bg-white/10 transition text-sm"
     >
       {label}
     </button>

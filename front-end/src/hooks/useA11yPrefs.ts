@@ -1,49 +1,89 @@
-import { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+export type FontSize = "md" | "lg" | "xl";
 
 export type A11yPrefs = {
-  mode: "system" | "light" | "dark";
+  captions: boolean;
+  theme: string;
   highContrast: boolean;
-  fontSize: "Pequeña" | "Mediana" | "Grande";
-  screenReaderHints: boolean; // pistas verbales / lector
-  captions: boolean;          // subtítulos/alertas visuales (auditiva)
+  fontSize: FontSize;
+  showFocusAlways: boolean;
+  ttsEnabled: boolean;     // lector de texto (auditivo)
+  motionReduced: boolean;  // pausar animaciones
 };
-
-const KEY = "ecosense:prefs";
 
 const defaultPrefs: A11yPrefs = {
-  mode: "system",
+  captions: false,
+  theme: "light",
   highContrast: false,
-  fontSize: "Mediana",
-  screenReaderHints: false,
-  captions: true,
+  fontSize: "md",
+  showFocusAlways: true,
+  ttsEnabled: false,
+  motionReduced: false
 };
 
-export function useA11yPrefs(){
+const Ctx = createContext<{
+  prefs: A11yPrefs;
+  setPrefs: React.Dispatch<React.SetStateAction<A11yPrefs>>;
+} | null>(null);
+
+export function A11yPrefsProvider({ children }: { children: React.ReactNode }) {
   const [prefs, setPrefs] = useState<A11yPrefs>(() => {
-    try { return { ...defaultPrefs, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; }
-    catch { return defaultPrefs; }
+    const raw = localStorage.getItem("ecosense_a11y");
+    return raw ? JSON.parse(raw) as A11yPrefs : defaultPrefs;
   });
 
   // Aplicar al <html>
   useEffect(() => {
     const root = document.documentElement;
 
-    // Tema
-    const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const dark = prefs.mode === "dark" || (prefs.mode === "system" && sysDark);
-    root.classList.toggle("dark", dark);
+    // alto contraste
+    if (prefs.highContrast) root.setAttribute("data-contrast", "high");
+    else root.removeAttribute("data-contrast");
 
-    // Alto contraste
-    root.classList.toggle("hc", prefs.highContrast);
+    // tamaño de fuente
+    root.removeAttribute("data-font");
+    if (prefs.fontSize !== "md") root.setAttribute("data-font", prefs.fontSize);
 
-    // Tamaño fuente
-    root.style.fontSize =
-      prefs.fontSize === "Pequeña" ? "95%" :
-      prefs.fontSize === "Grande"  ? "115%" : "100%";
+    // foco visible siempre (opcional, ya lo forzamos por CSS base)
+    if (prefs.showFocusAlways) root.style.setProperty("--ring", "#60a5fa");
+    else root.style.removeProperty("--ring");
 
-    // Guardar
-    localStorage.setItem(KEY, JSON.stringify(prefs));
+    // reducir movimiento
+    if (prefs.motionReduced) {
+      root.style.setProperty("scroll-behavior","auto");
+      const style = document.createElement("style");
+      style.id = "reduce-motion";
+      style.innerHTML = `*{animation: none !important; transition: none !important}`;
+      document.head.appendChild(style);
+    } else {
+      document.getElementById("reduce-motion")?.remove();
+      root.style.removeProperty("scroll-behavior");
+    }
+
+    localStorage.setItem("ecosense_a11y", JSON.stringify(prefs));
   }, [prefs]);
 
-  return { prefs, setPrefs };
+  const contextValue = useMemo(() => ({
+    prefs,
+    setPrefs
+  }), [prefs]);
+
+  return React.createElement(Ctx.Provider, { value: contextValue }, children);
+}
+
+export function useA11yPrefs(){
+  const ctx = useContext(Ctx);
+  if(!ctx) throw new Error("useA11yPrefs debe usarse dentro de A11yPrefsProvider");
+  return ctx;
+}
+
+/* util auditivo: sintetizar voz (lector de texto) */
+export function speak(text: string){
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-ES";
+    window.speechSynthesis.speak(u);
+  }catch{ /* no-op */ }
 }

@@ -1,24 +1,31 @@
-import ThemeToggle from "./ThemeToggle";
+import { Link, NavLink } from "react-router-dom";
+import { useTheme } from "../hooks/useTheme";
 
 export default function Header() {
-  return (
-    <header className="bg-blue-700 text-white shadow">
-      <nav className="container mx-auto flex items-center justify-between px-4 py-3" aria-label="Principal">
-        <a href="#" className="flex items-center gap-2">
-          <span className="inline-block h-8 w-8 rounded bg-white/20" aria-hidden="true" />
-          <span className="font-bold text-xl">EcoSense</span>
-        </a>
+  const { theme, cycleTheme } = useTheme();
 
-        <div className="flex items-center gap-3">
-          <ul className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <li><a className="hover:underline" href="#panel">Panel</a></li>
-            <li><a className="hover:underline" href="#dispositivos">Dispositivos</a></li>
-            <li><a className="hover:underline" href="#reportes">Reportes</a></li>
-            <li><a className="hover:underline" href="#ayuda">Ayuda</a></li>
-          </ul>
-          <ThemeToggle />
-        </div>
-      </nav>
+  const themeLabel =
+    theme === "light" ? "Claro" : theme === "dark" ? "Oscuro" : "Tema del sistema";
+
+  return (
+    <header className="navbar">
+      <div className="navbar-inner container">
+        <Link to="/" className="brand" aria-label="Ir al inicio">
+          <img src="/logo.svg" alt="" width={28} height={28} className="brand-mark" style={{padding:0, background:"transparent"}} />
+
+        </Link>
+
+        <nav className="nav" aria-label="Principal">
+          <NavLink to="/" end className={({isActive})=> isActive ? "active" : ""}>Panel</NavLink>
+          <NavLink to="/dispositivos" className={({isActive})=> isActive ? "active" : ""}>Dispositivos</NavLink>
+          <NavLink to="/reportes" className={({isActive})=> isActive ? "active" : ""}>Reportes</NavLink>
+          <NavLink to="/ayuda" className={({isActive})=> isActive ? "active" : ""}>Ayuda</NavLink>
+        </nav>
+
+        <button className="btn" onClick={cycleTheme} aria-label="Cambiar tema">
+          {themeLabel}
+        </button>
+      </div>
     </header>
   );
 }

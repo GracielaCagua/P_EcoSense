@@ -1,77 +1,28 @@
-import { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
-import Hero from "./components/Hero";
-import HomeForm from "./components/HomeForm"; // ajusta según la carpeta real
-import Footer from "./components/Footer";
-import AccessibilityMenu from "./components/AccessibilityMenu";
-import { useA11yPrefs } from "./hooks/useA11yPrefs";
-import { AnnouncerProvider, useAnnouncer } from "./components/Announcer";
+import Home from "./pages/Home";
 
-/* ------------------ Toast (mensajes accesibles) ------------------ */
-function Toast() {
-  const { announce } = useAnnouncer();
-
-  // Anuncio al montar el componente
-  useEffect(() => {
-    announce("Bienvenido a EcoSense. Configura tus preferencias.");
-  }, [announce]);
-
-  return null;
-}
-
-/* --------------------------- App principal --------------------------- */
-export default function App() {
-  const { prefs } = useA11yPrefs();
-
+function Placeholder({ title }: { title: string }) {
   return (
-    <AnnouncerProvider>
-      <div className="min-h-screen flex flex-col dark:bg-gray-900 dark:text-white">
-        <Header />
-        <Hero />
-
-        <main
-          id="contenido"
-          className="container mx-auto px-4 py-10 grid gap-8 md:grid-cols-3"
-        >
-          <section className="md:col-span-2">
-            <HomeForm />
-          </section>
-          <aside className="md:col-span-1">
-            <AccessibilityMenu />
-          </aside>
-        </main>
-
-        <Footer />
-
-        {/* Región visible de subtítulos / alertas visuales */}
-        {prefs.captions && <A11yToast />}
-
-        {/* Lanzar mensaje de bienvenida */}
-        <Toast />
+    <main className="container section">
+      <div className="card" style={{minHeight: 260}}>
+        <h3>{title}</h3>
+        <p style={{color:"var(--muted)"}}>Próximamente…</p>
       </div>
-    </AnnouncerProvider>
+    </main>
   );
 }
 
-/* ---------------- Toast visible (para subtítulos visuales) ---------------- */
-import { useState } from "react";
-
-function A11yToast() {
-  const [text, setText] = useState<string | null>(null);
-
-  // Escuchar mensajes globales
-  useEffect(() => {
-    (window as any).announce = (msg: string) => {
-      setText(msg);
-      setTimeout(() => setText(null), 4000);
-    };
-  }, []);
-
-  if (!text) return null;
-
+export default function App() {
   return (
-    <div className="a11y-toast" role="status" aria-live="polite">
-      {text}
-    </div>
+    <>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dispositivos" element={<Placeholder title="Dispositivos" />} />
+        <Route path="/reportes" element={<Placeholder title="Reportes" />} />
+        <Route path="/ayuda" element={<Placeholder title="Ayuda" />} />
+      </Routes>
+    </>
   );
 }

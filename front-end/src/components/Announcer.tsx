@@ -1,25 +1,23 @@
+// src/components/Announcer.tsx
 import { createContext, useContext, useState } from "react";
 
-type AnnounceCtx = { announce: (msg:string)=>void };
-const Ctx = createContext<AnnounceCtx>({ announce: ()=>{} });
-export const useAnnouncer = () => useContext(Ctx);
+type AnnounceFn = (msg: string) => void;
+const AnnouncerCtx = createContext<AnnounceFn>(() => {});
 
-export function AnnouncerProvider({ children }:{children: React.ReactNode}){
-  const [msg, setMsg] = useState<string | null>(null);
-
-  const announce = (m:string) => {
-    setMsg(m);
-    // quitar luego de 4s
-    setTimeout(()=>setMsg(null), 4000);
-  };
+export function AnnouncerProvider({ children }: { children: React.ReactNode }) {
+  const [msg, setMsg] = useState("");
+  const announce: AnnounceFn = (m) => { setMsg(""); setTimeout(() => setMsg(m), 30); };
 
   return (
-    <Ctx.Provider value={{ announce }}>
-      {/* Región para lectores */}
-      <div aria-live="polite" aria-atomic="true" className="sr-only">{msg}</div>
-
-      {/* “Subtítulo” visible (si captions está activo lo mostrarás desde App) */}
+    <AnnouncerCtx.Provider value={announce}>
       {children}
-    </Ctx.Provider>
+      <div aria-live="polite" aria-atomic="true" className="sr-only">{msg}</div>
+    </AnnouncerCtx.Provider>
   );
+}
+
+// desactiva el warning del linter solo aquí
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAnnouncer() {
+  return useContext(AnnouncerCtx);
 }

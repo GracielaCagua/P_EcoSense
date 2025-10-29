@@ -1,35 +1,26 @@
-@import "tailwindcss";
-@reference "tailwindcss";
+/* front-end/src/index.css */
 
-/* Base accesible */
-html { font-size: 100%; }
-body { @apply text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-50 font-sans; }
+/* -------------------- DIRECTIVAS DE TAILWIND (CORRECTAS) -------------------- */
+@import "tailwindcss/preflight"; /* Reemplaza @tailwind base */
+@tailwind utilities; 
+/* @tailwind components; (No es necesario en esta versión simplificada) */
 
-/* Alto contraste (visual) */
-.hc :where(a,button,select,input,label,p,h1,h2,h3,h4,h5,h6){ color:#0b1e59!important; }
-.hc .card { background:#fff!important; border:2px solid #0b1e59; }
-.hc .btn-primary { background:#0b1e59!important; color:#fff!important; }
+/* -------------------- CORRECCIÓN CRÍTICA: REGLA PARA EL BODY/RAÍZ -------------------- */
 
-/* Elementos cómodos de tocar (motriz) */
-button,.btn,.input,.select{ min-height:44px; }
-
-/* Enfoque visible */
-:focus-visible{ outline:3px solid #1e40af; outline-offset:2px; }
-
-/* Reducir animaciones (cognitiva) */
-@media (prefers-reduced-motion: reduce){
-  *{ animation:none!important; transition:none!important; }
+/* ¡ELIMINAMOS CUALQUIER VARIABLE O COLOR AZUL! */
+/* Forzamos el color de fondo para que el body no tenga color azul de marca */
+body {
+    background-color: #ffffff; /* ¡FONDO BLANCO PURO! */
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif; 
+    color: #1f2937; /* Gris oscuro para el texto base */
 }
 
-/* Utilidades */
-.card       { @apply rounded-xl border border-gray-200 p-6 dark:border-gray-800 bg-white dark:bg-gray-900; }
-.btn-primary{ @apply rounded-lg bg-blue-700 px-4 py-2 text-white hover:bg-blue-800; }
-.btn-outline{ @apply rounded-lg border px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800; }
-.input      { @apply w-full rounded-md border p-2 dark:bg-gray-900 dark:border-gray-700; }
-.select     { @apply w-full rounded-md border p-2 dark:bg-gray-900 dark:border-gray-700; }
-.field      { @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1; }
+/* El contenedor principal de React (App.tsx) es ahora el que maneja el fondo: 
+   <div className="bg-gray-100">...</div> */
 
-/* Live region visible como “toast” (auditiva → feedback visual) */
-.a11y-toast{
-  @apply fixed right-3 bottom-3 z-50 max-w-sm rounded-lg bg-blue-700 text-white px-4 py-3 shadow-lg;
+/* -------------------- CLASES DE ACCESIBILIDAD -------------------- */
+html.high-contrast {
+    filter: invert(100%) hue-rotate(180deg);
 }
+/* ...etc. */
